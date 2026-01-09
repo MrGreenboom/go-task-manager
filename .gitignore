@@ -1,0 +1,21 @@
+#Binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.out
+
+#Go workspace
+/bin/
+/dist/
+/tmp/
+
+#IDE
+.vscode/
+.idea/
+
+#OS
+.DS_Store
+
+#Env
+.env
