@@ -71,11 +71,23 @@ func (r *TaskRepository) Update(ctx context.Context, userID int64, t *model.Task
 		SET title=$1, description=$2, status=$3, updated_at=now()
 		WHERE id=$4 AND user_id=$5;
 	`
-	_, err := r.db.Exec(ctx, query, t.Title, t.Description, t.Status, t.ID, userID)
-	return err
+	res, err := r.db.Exec(ctx, query, t.Title, t.Description, t.Status, t.ID, userID)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
 }
 
 func (r *TaskRepository) Delete(ctx context.Context, userID, id int64) error {
-	_, err := r.db.Exec(ctx, `DELETE FROM tasks WHERE id=$1 AND user_id=$2;`, id, userID)
-	return err
+	res, err := r.db.Exec(ctx, `DELETE FROM tasks WHERE id=$1 AND user_id=$2;`, id, userID)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+	return nil
 }

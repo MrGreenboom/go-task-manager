@@ -6,14 +6,21 @@ import (
 	"strings"
 
 	"github.com/MrGreenboom/go-task-manager/internal/model"
-	"github.com/MrGreenboom/go-task-manager/internal/repository"
 )
 
-type TaskService struct {
-	repo *repository.TaskRepository
+type TaskRepo interface {
+	Create(ctx context.Context, t *model.Task) (int64, error)
+	GetByID(ctx context.Context, userID, id int64) (*model.Task, error)
+	List(ctx context.Context, userID int64) ([]model.Task, error)
+	Update(ctx context.Context, userID int64, t *model.Task) error
+	Delete(ctx context.Context, userID, id int64) error
 }
 
-func NewTaskService(repo *repository.TaskRepository) *TaskService {
+type TaskService struct {
+	repo TaskRepo
+}
+
+func NewTaskService(repo TaskRepo) *TaskService{
 	return &TaskService{repo: repo}
 }
 

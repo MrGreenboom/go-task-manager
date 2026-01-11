@@ -76,7 +76,7 @@ func main() {
 	mux.Handle("/tasks/", handler.AuthMiddleware(protectedMux))
 
 	log.Printf("starting server on %s", addr)
-	if err := http.ListenAndServe(addr, mux); err != nil {
+	if err := http.ListenAndServe(addr, handler.LoggingMiddleware(mux)); err != nil {
 		log.Fatal(err)
 	}
 }

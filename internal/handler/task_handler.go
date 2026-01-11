@@ -2,11 +2,13 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strconv"
 	"strings"
 
 	"github.com/MrGreenboom/go-task-manager/internal/model"
+	"github.com/MrGreenboom/go-task-manager/internal/repository"
 	"github.com/MrGreenboom/go-task-manager/internal/service"
 )
 
@@ -111,16 +113,24 @@ func (h *TaskHandler) handleTaskByID(w http.ResponseWriter, r *http.Request) {
 		t.ID = id
 		// userID берём из токена, поэтому тут t.UserID не нужен
 		if err := h.svc.Update(r.Context(), uid, &t); err != nil {
-			writeError(w, http.StatusBadRequest, err.Error())
-			return
+		    if errors.Is(err, repository.ErrNotFound) {
+		        writeError(w, http.StatusNotFound, "task not found")
+		        return
+		    }
+		    writeError(w, http.StatusBadRequest, err.Error())
+		    return
 		}
 
 		w.WriteHeader(http.StatusNoContent)
 
 	case http.MethodDelete:
 		if err := h.svc.Delete(r.Context(), uid, id); err != nil {
-			writeError(w, http.StatusInternalServerError, err.Error())
-			return
+		    if errors.Is(err, repository.ErrNotFound) {
+		        writeError(w, http.StatusNotFound, "task not found")
+		        return
+		    }
+		    writeError(w, http.StatusInternalServerError, err.Error())
+		    return
 		}
 		w.WriteHeader(http.StatusNoContent)
 

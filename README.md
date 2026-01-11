@@ -25,3 +25,7 @@ Backend-сервис для управления задачами: регист�
 ### 1) Запуск
 ```bash
 docker compose up --build -d
+
+## Testing
+```bash
+go test ./internal/service
