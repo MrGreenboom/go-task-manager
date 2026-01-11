@@ -24,3 +24,7 @@ Authorization: Bearer <token>
 curl -X POST http://localhost:8080/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"gairbek@test.com","password":"qwerty12"}'
+
+## Запуск через Docker Compose
+```bash
+docker compose up --build -d

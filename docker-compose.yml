@@ -14,7 +14,22 @@ services:
       test: ["CMD-SHELL", "pg_isready -U task_user -d task_manager"]
       interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: go_task_manager_api
+    environment:
+      HTTP_ADDR: ":8080"
+      JWT_SECRET: "supersecret_change_me"
+      DB_DSN: "postgres://task_user:task_pass@db:5432/task_manager?sslmode=disable"
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
 
 volumes:
   db_data:
