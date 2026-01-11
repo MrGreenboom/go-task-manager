@@ -27,33 +27,47 @@ func (s *TaskService) Create(ctx context.Context, t *model.Task) (int64, error) 
 	if t.Status == "" {
 		t.Status = "new"
 	}
-	if t.UserID == 0 {
-		t.UserID = 1 // временно, до Этапа 4 (auth)
+	if t.UserID <= 0 {
+		return 0, errors.New("user_id is required")
 	}
+
 	return s.repo.Create(ctx, t)
 }
 
-func (s *TaskService) GetByID(ctx context.Context, id int64) (*model.Task, error) {
-	return s.repo.GetByID(ctx, id)
+func (s *TaskService) GetByID(ctx context.Context, userID, id int64) (*model.Task, error) {
+	if userID <= 0 || id <= 0 {
+		return nil, errors.New("invalid ids")
+	}
+	return s.repo.GetByID(ctx, userID, id)
 }
 
-func (s *TaskService) List(ctx context.Context) ([]model.Task, error) {
-	return s.repo.List(ctx)
+func (s *TaskService) List(ctx context.Context, userID int64) ([]model.Task, error) {
+	if userID <= 0 {
+		return nil, errors.New("invalid user id")
+	}
+	return s.repo.List(ctx, userID)
 }
 
-func (s *TaskService) Update(ctx context.Context, t *model.Task) error {
+func (s *TaskService) Update(ctx context.Context, userID int64, t *model.Task) error {
 	t.Title = strings.TrimSpace(t.Title)
 	t.Description = strings.TrimSpace(t.Description)
 
+	if userID <= 0 || t.ID <= 0 {
+		return errors.New("invalid ids")
+	}
 	if t.Title == "" {
 		return errors.New("title is required")
 	}
 	if t.Status == "" {
 		t.Status = "new"
 	}
-	return s.repo.Update(ctx, t)
+
+	return s.repo.Update(ctx, userID, t)
 }
 
-func (s *TaskService) Delete(ctx context.Context, id int64) error {
-	return s.repo.Delete(ctx, id)
+func (s *TaskService) Delete(ctx context.Context, userID, id int64) error {
+	if userID <= 0 || id <= 0 {
+		return errors.New("invalid ids")
+	}
+	return s.repo.Delete(ctx, userID, id)
 }

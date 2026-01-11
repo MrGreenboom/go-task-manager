@@ -26,13 +26,13 @@ func (r *TaskRepository) Create(ctx context.Context, t *model.Task) (int64, erro
 	return id, err
 }
 
-func (r *TaskRepository) GetByID(ctx context.Context, id int64) (*model.Task, error) {
+func (r *TaskRepository) GetByID(ctx context.Context, userID, id int64) (*model.Task, error) {
 	query := `
 		SELECT id, user_id, title, description, status, created_at, updated_at
 		FROM tasks
-		WHERE id = $1;
+		WHERE id = $1 AND user_id = $2;
 	`
-	row := r.db.QueryRow(ctx, query, id)
+	row := r.db.QueryRow(ctx, query, id, userID)
 
 	var t model.Task
 	if err := row.Scan(&t.ID, &t.UserID, &t.Title, &t.Description, &t.Status, &t.CreatedAt, &t.UpdatedAt); err != nil {
@@ -41,13 +41,14 @@ func (r *TaskRepository) GetByID(ctx context.Context, id int64) (*model.Task, er
 	return &t, nil
 }
 
-func (r *TaskRepository) List(ctx context.Context) ([]model.Task, error) {
+func (r *TaskRepository) List(ctx context.Context, userID int64) ([]model.Task, error) {
 	query := `
 		SELECT id, user_id, title, description, status, created_at, updated_at
 		FROM tasks
+		WHERE user_id = $1
 		ORDER BY id DESC;
 	`
-	rows, err := r.db.Query(ctx, query)
+	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -64,17 +65,17 @@ func (r *TaskRepository) List(ctx context.Context) ([]model.Task, error) {
 	return tasks, rows.Err()
 }
 
-func (r *TaskRepository) Update(ctx context.Context, t *model.Task) error {
+func (r *TaskRepository) Update(ctx context.Context, userID int64, t *model.Task) error {
 	query := `
 		UPDATE tasks
 		SET title=$1, description=$2, status=$3, updated_at=now()
-		WHERE id=$4;
+		WHERE id=$4 AND user_id=$5;
 	`
-	_, err := r.db.Exec(ctx, query, t.Title, t.Description, t.Status, t.ID)
+	_, err := r.db.Exec(ctx, query, t.Title, t.Description, t.Status, t.ID, userID)
 	return err
 }
 
-func (r *TaskRepository) Delete(ctx context.Context, id int64) error {
-	_, err := r.db.Exec(ctx, `DELETE FROM tasks WHERE id=$1;`, id)
+func (r *TaskRepository) Delete(ctx context.Context, userID, id int64) error {
+	_, err := r.db.Exec(ctx, `DELETE FROM tasks WHERE id=$1 AND user_id=$2;`, id, userID)
 	return err
 }
