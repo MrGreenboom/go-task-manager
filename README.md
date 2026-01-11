@@ -1,30 +1,27 @@
 # Go Task Manager (REST API)
 
-REST API для управления задачами.
+Backend-сервис для управления задачами: регистрация/логин, JWT-защита, CRUD задач.
+Проект сделан как портфолио: чистая структура (handler/service/repository), PostgreSQL, миграции, Docker Compose.
 
 ## Стек
 - Go (net/http)
 - PostgreSQL
-- Docker / docker-compose
+- JWT (golang-jwt/jwt)
+- bcrypt (x/crypto/bcrypt)
 - Goose migrations
+- Docker / docker-compose
 
-## Запуск БД
-```bash
-docker compose up -d
+## Архитектура
+- `internal/handler` — HTTP handlers + middleware (JWT)
+- `internal/service` — бизнес-логика и валидация
+- `internal/repository` — доступ к PostgreSQL
+- `migrations` — миграции БД (goose)
+- `cmd/app` — точка входа приложения
 
-## Auth
-- POST /auth/register
-- POST /auth/login (JWT)
+---
 
-## Protected
-Все запросы к /tasks требуют заголовок:
-Authorization: Bearer <token>
-### Пример: логин
-```bash
-curl -X POST http://localhost:8080/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"gairbek@test.com","password":"qwerty12"}'
+## Быстрый старт (Docker Compose)
 
-## Запуск через Docker Compose
+### 1) Запуск
 ```bash
 docker compose up --build -d
